@@ -35,6 +35,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 # POST /auth/register
 @app.post("/auth/register", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(User).filter(User.username == user.username).first()
+    if existing_user is not None:
+        raise HTTPException(status_code=400, detail="Username already exists")
     new_user = User(username = user.username, email = user.email, password = bcrypt.hash(user.password))
     db.add(new_user)
     db.commit()
@@ -77,7 +80,7 @@ def return_stats(user: User = Depends(get_current_user), db: Session = Depends(g
         func.count(Result.id)
     ).filter(Result.user_id == user.id).one()
     if total_tests == 0:
-        raise HTTPException(status_code = 404, detail = "No results found")
+        avg_wpm, best_wpm, avg_accuracy, total_tests = 0, 0, 0, 0
     stats_response = StatsResponse(avg_wpm = avg_wpm, best_wpm = best_wpm, avg_accuracy = avg_accuracy, total_tests = total_tests)
     return stats_response
     

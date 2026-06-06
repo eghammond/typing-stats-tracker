@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
 class UserCreate(BaseModel):
@@ -11,8 +11,7 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class LoginCreate(BaseModel):
     username: str
@@ -34,16 +33,14 @@ class ResultResponse(BaseModel):
     accuracy: float
     duration: float
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StatsResponse(BaseModel):
     avg_wpm: float
     best_wpm: float
     avg_accuracy: float
     total_tests: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
     
 
 
