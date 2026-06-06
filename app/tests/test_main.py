@@ -5,9 +5,13 @@ from ..main import app
 from ..models import Base
 from ..database import get_db
 import pytest
+from jose import jwt
+from datetime import datetime, timedelta, timezone
+from ..main import SECRET_KEY
 
 
 client = TestClient(app)
+app.state.limiter.enabled = False
 
 SQLITE_URL = "sqlite:///./test.db"
 engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False})
@@ -97,6 +101,16 @@ def test_result_fetch_no_results():
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 0
+
+def test_get_results_expired_token_():
+    expired_payload = {
+        "sub": "1",
+        "exp": datetime.now(timezone.utc) - timedelta(minutes=30)
+    }
+    expired_token = jwt.encode(expired_payload, SECRET_KEY, algorithm="HS256")
+    response = client.get("/results", headers={"Authorization": f"Bearer {expired_token}"})
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Token has expired"
 
 # GET /results/stats
 
