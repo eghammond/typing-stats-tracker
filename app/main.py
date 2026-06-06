@@ -5,7 +5,8 @@ from .database import get_db, engine
 from .models import User, Result
 from .schemas import UserCreate, UserResponse, LoginCreate, LoginResponse, ResultCreate, ResultResponse, StatsResponse
 from . import models
-from passlib.hash import bcrypt
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from jose import jwt, JWTError, ExpiredSignatureError
 from dotenv import load_dotenv
 import os
@@ -18,6 +19,7 @@ from slowapi.util import get_remote_address
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+ph = PasswordHasher()
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -53,7 +55,7 @@ def create_user(request: Request, user: UserCreate, db: Session = Depends(get_db
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user is not None:
         raise HTTPException(status_code=400, detail="Email already exists")
-    new_user = User(username = user.username, email = user.email, password = bcrypt.hash(user.password))
+    new_user = User(username = user.username, email = user.email, password = ph.hash(user.password))
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -64,7 +66,11 @@ def create_user(request: Request, user: UserCreate, db: Session = Depends(get_db
 @limiter.limit("5/minute")
 def create_login(request: Request, login: LoginCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == login.username).first()
-    if user is None or not bcrypt.verify(login.password, user.password):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid Credentials")
+    try:
+        ph.verify(user.password, login.password)
+    except VerifyMismatchError:
         raise HTTPException(status_code=401, detail="Invalid Credentials")
     payload = {"sub": str(user.id), "exp": datetime.now(timezone.utc) + timedelta(minutes=30)}
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
