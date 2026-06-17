@@ -6,8 +6,8 @@ A REST API for recording results of typing speed tests, and computing per-user s
 
 - **FastAPI** — web framework
 - **PostgreSQL** — database
-- **SQLAlchemy** — ORM
-- **python-jose** — JWT encoding/decoding
+- **SQLAlchemy** — ORM (Object Relational Mapping)
+- **python-jose** — JWT (JSON Web Token) encoding/decoding
 - **argon2-cffi** — password hashing
 - **slowapi** — rate limiting
 - **pytest** — testing
@@ -69,7 +69,7 @@ All request and response bodies are JSON. Protected endpoints require an `Author
 | ------ | ----------------- | ---- | -------------------------------------------- |
 | POST   | `/auth/register`  | No   | Create a new user account.                   |
 | POST   | `/auth/login`     | No   | Log in and receive a JWT access token.       |
-| POST   | `/results`        | Yes  | Submit a typing-test result.                 |
+| POST   | `/results`        | Yes  | Submit a typing speed test result.                 |
 | GET    | `/results`        | Yes  | List the current user's results.             |
 | GET    | `/results/stats`  | Yes  | Aggregate stats (avg/best WPM, accuracy).    |
 
