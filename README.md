@@ -105,4 +105,4 @@ The API is deployed on Railway. Railway provisions PostgreSQL and injects `DATAB
 
 ## Acknowledgements
 
-Built as a learning project. I used an AI assistant (Claude) as a tutor while building this — for explaining concepts, reviewing my code, and debugging — while writing the code myself. Claude also helped me write this README.
+Built as a learning project. I used an AI assistant (Claude) as a tutor writing the code myself. Claude provided guidance on which libraries to use and how to architect the project, as well as feedback on code I'd written. Claude wrote the majority of this README.
